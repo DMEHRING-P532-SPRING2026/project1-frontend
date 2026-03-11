@@ -1,14 +1,15 @@
 function ExecutedTradeItem({ createdAt, executedAt, limitPrice, orderType, price, quantity, side, status, ticker, totalPrice, type}) {
   function formatDate(dateString) {
     if (!dateString) return null
-    return new Date(dateString).toLocaleString('en-US', {
+    const normalized = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+    return new Date(normalized).toLocaleString('en-US', {
       month: 'numeric',
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+      minute: '2-digit',
+    });
+}
 
   return (
     <div className="bg-neutral-500 p-3 rounded text-white flex flex-col gap-1">
