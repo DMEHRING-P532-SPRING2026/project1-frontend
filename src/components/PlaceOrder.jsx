@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getStocks } from '../services/stocksService'
 import { placeOrder } from '../services/orderService'
 
-function OrderDropdown({ label, options, onSelect }) {
+function OrderDropdown({ options, onSelect }) {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState('')
 
@@ -21,7 +21,11 @@ function OrderDropdown({ label, options, onSelect }) {
           {options.filter(o => o !== selected).map((option) => (
             <button
               key={option}
-              onClick={() => { setSelected(option); setIsOpen(false); onSelect?.(option) }}
+              onClick={() => {
+                setSelected(option)
+                setIsOpen(false)
+                onSelect?.(option)
+              }}
               className="block w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-600 hover:text-white"
             >
               {option}
@@ -40,6 +44,7 @@ function QuantityInput({ onChange }) {
   function handleChange(e) {
     const value = e.target.value
     setQuantity(value)
+
     if (value === '') {
       setError('Quantity is required')
     } else if (value <= 0) {
@@ -71,6 +76,7 @@ function PriceInput({ onChange }) {
   function handleChange(e) {
     const value = e.target.value
     setPrice(value)
+
     if (value === '') {
       setError('Price is required')
     } else if (value <= 0) {
@@ -98,7 +104,7 @@ function PriceInput({ onChange }) {
   )
 }
 
-function PlaceOrder() {
+function PlaceOrder({ userId }) {
   const [tickers, setTickers] = useState([])
   const [orderType, setOrderType] = useState('')
   const [ticker, setTicker] = useState('')
@@ -108,31 +114,62 @@ function PlaceOrder() {
   const [limitPrice, setLimitPrice] = useState('')
 
   useEffect(() => {
-    getStocks().then(data => setTickers(data.map(stock => stock.ticker)))
+    getStocks().then(data =>
+      setTickers(data.map(stock => stock.ticker))
+    )
   }, [])
 
-    function handleSubmit() {
-    placeOrder(1, orderType, ticker, quantity, side, condition, limitPrice)
+  function handleSubmit() {
+    if (!userId || !orderType || !ticker || !side || !quantity) {
+      alert('Missing required fields')
+      return
     }
-    
+
+    console.log("Submitting order for user:", userId)
+
+    placeOrder(
+      userId,
+      orderType,
+      ticker,
+      quantity,
+      side,
+      condition,
+      limitPrice
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2 p-6">
-      <h1 className='text-white font-bold text-lg tracking-wide'>Order Type</h1>
-      <OrderDropdown label="Order Type" options={['Market', 'Limit']} onSelect={setOrderType} />
-      <h1 className='text-white font-bold text-lg tracking-wide'>Stock</h1>
-      <OrderDropdown label="Stock" options={tickers} onSelect={setTicker} />
-      <h1 className='text-white font-bold text-lg tracking-wide'>Side</h1>
-      <OrderDropdown label="Side" options={['Buy', 'Sell']} onSelect={setSide} />
-      <h1 className='text-white font-bold text-lg tracking-wide'>Quantity</h1>
+      <h1 className='text-white font-bold text-lg'>Order Type</h1>
+      <OrderDropdown options={['Market', 'Limit']} onSelect={setOrderType} />
+
+      <h1 className='text-white font-bold text-lg'>Stock</h1>
+      <OrderDropdown options={tickers} onSelect={setTicker} />
+
+      <h1 className='text-white font-bold text-lg'>Side</h1>
+      <OrderDropdown options={['Buy', 'Sell']} onSelect={setSide} />
+
+      <h1 className='text-white font-bold text-lg'>Quantity</h1>
       <QuantityInput onChange={setQuantity} />
+
       {orderType === 'Limit' && (
         <>
-          <h1 className='text-white font-bold text-lg tracking-wide'>Condition</h1>
-          <OrderDropdown label="Condition" options={['Less Than', 'Less Than or Equal to', 'Greater Than', 'Greater Than or Equal to']} onSelect={setCondition} />
-          <h1 className='text-white font-bold text-lg tracking-wide'>Limit Price</h1>
+          <h1 className='text-white font-bold text-lg'>Condition</h1>
+          <OrderDropdown
+            options={[
+              'Less Than',
+              'Less Than or Equal to',
+              'Greater Than',
+              'Greater Than or Equal to'
+            ]}
+            onSelect={setCondition}
+          />
+
+          <h1 className='text-white font-bold text-lg'>Limit Price</h1>
           <PriceInput onChange={setLimitPrice} />
         </>
       )}
+
       <button
         onClick={handleSubmit}
         className="mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded"

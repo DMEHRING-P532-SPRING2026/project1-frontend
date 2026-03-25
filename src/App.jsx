@@ -35,7 +35,9 @@ function App() {
       onAlert: () => setAlertCount(prev => prev + 1)
     })
 
-    return () => disconnectWebSocket()
+    return () => {
+      disconnectWebSocket()
+    }
   }, [userId])
 
   const handleUserSwitch = (id) => {
@@ -123,8 +125,11 @@ function App() {
               </button>
             )}
           </div>
-          <h1 className="text-white font-bold text-6xl tracking-wide flex items-center justify-center flex-1">${user?.balance?.toFixed(2)}</h1>
+          <h1 className="text-white font-bold text-6xl tracking-wide flex items-center justify-center flex-1">
+            ${user?.balance?.toFixed(2)}
+          </h1>
         </div>
+
         <div className="bg-neutral-600 rounded overflow-hidden row-span-2 flex flex-col">
           <div className="bg-neutral-700 px-4 py-3 border-b border-neutral-500">
             <h1 className="text-white font-bold text-3xl tracking-wide">Place Order</h1>
